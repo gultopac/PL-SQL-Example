@@ -1,0 +1,12 @@
+declare
+say number;
+begin
+  for rec in (select k.t_personelkodu from adm_kullanicilar k where k.t_kullanicikodu like 'ÇH%' and k.t_aktif=1)
+  loop
+    select count into say  from per_uzmanlik p where p.t_sicilno=rec.t_personelkodu and p.t_uzmanlikkodu='1500';
+    if say=0 then
+      insert into per_uzmanlik(t_sicilno, t_uzmanlikkodu, t_drtescilno, t_userid,  t_createuser)
+      values(rec.t_personelkodu, '1500', (select pp.t_per_drtescilno from per_personel_karti pp where pp.t_per_sicilno=rec.t_personelkodu),'139','139');
+    end;
+  end loop
+end;

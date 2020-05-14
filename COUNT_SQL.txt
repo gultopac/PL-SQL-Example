@@ -1,0 +1,26 @@
+SELECT kt.t_tckimlikno,h.t_hizmetkodu, h.t_basvuruno,kt.t_adi,dd.t_detaykodu,dd.t_detayadi,h.t_islem_tarihi_date
+,(select count(1) from hst_hasta_hiz_hareket hh, stk_kart ss where hh.t_basvuruno=bb.t_basvuruno and hh.t_tablo_tur='1' and hh.t_hizmetkodu=ss.t_stokkodu and ss.t_stokkodu like '150.03.01.01.01%') as antibiyotik
+,(select Count(1) from kons_kabul kk where kk.t_basvuruno=bb.t_basvuruno and kk.t_islembolumkodu like '13%') as konsultasyon
+,(select Count(1) from hst_yatis yy where yy.t_basvuruno=bb.t_basvuruno and yy.t_bolumkodu like '13%') as yatis
+FROM hst_hasta_hiz_hareket h,hst_hastakarti kt,hst_basvuru bb,hst_islem_detay dd,
+(
+      select DISTINCT d.t_resmikodu, to_date(t.t_islem_tarihi_date, 'dd.mm.yyyy') -5 AS gun5Once , t.t_islem_tarihi_date ,to_date(t.t_islem_tarihi_date, 'dd.mm.yyyy') +5 AS gun5Sonra
+                      
+      from hst_hasta_hiz_hareket t, hst_basvuru b,  hst_hastakarti k, hst_islem_detay d
+      WHERE b.t_basvuruno = t.t_basvuruno
+      AND b.t_dosyano = k.t_dosyano
+      AND b.t_basvuruno = '7381856'
+      AND t.t_hizmetkodu = d.t_detaykodu
+      AND k.t_tckimlikno = '20905054038'
+      AND t.t_tablo_tur ='4'
+      AND d.t_gsskodu = 5
+) hasta
+
+WHERE h.t_tablo_tur = '4'
+AND dd.t_detaykodu = h.t_hizmetkodu
+AND bb.t_dosyano=kt.t_dosyano
+AND h.t_basvuruno=bb.t_basvuruno
+--AND h.t_hizmetkodu = hasta.t_hizmetkodu
+and dd.t_resmikodu=hasta.t_resmikodu
+AND h.t_islem_tarihi_date >= to_date('04.12.2014 00:00:00','dd.mm.yyyy hh24:mi:ss')
+AND h.t_islem_tarihi_date <= to_date('14.12.2014 00:00:00','dd.mm.yyyy hh24:mi:ss')

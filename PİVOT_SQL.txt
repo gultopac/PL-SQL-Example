@@ -1,0 +1,20 @@
+SELECT * FROM
+(
+select trunc(h.t_islem_tarihi_date) AS TARIH, h.t_miktar, aa.t_anabirimadi
+from hst_hasta_hiz_hareket h, hst_islem_detay d, hst_altbirim a, hst_anabirim aa
+where h.t_tablo_tur=4
+and aa.t_anabirimkodu in ('3301','37')
+and h.t_hizmetkodu=d.t_detaykodu
+and d.t_resmikodu='702700'
+and h.t_istembolumkodu=a.t_altbirimkodu
+and a.t_anabirimkodu=aa.t_anabirimkodu
+and trunc(h.t_islem_tarihi_date)>=to_Date('02.01.2020','dd.mm.yyyy')
+and trunc(h.t_islem_tarihi_date)<=to_Date('29.02.2020','dd.mm.yyyy')
+and to_char(to_Date(h.t_islem_tarihi_date,'dd.mm.yyyy'),'d') not in ('6','7')
+--group by trunc(h.t_islem_tarihi_date), aa.t_anabirimkodu, aa.t_anabirimadi
+)
+PIVOT 
+  (SUM(t_miktar)
+  FOR t_anabirimadi IN ('ÇOCUK PSİKİYATRİ','PSİKİYATRİ')
+)
+ORDER BY trunc(TARIH)

@@ -1,0 +1,22 @@
+Select k.t_tckimlikno,k.t_dosyano,k.t_adi,b.t_basvuruno,b.t_basvurutarihi,t.t_detay_kodu,t.t_detay_adi,AL.T_ALTBIRIMKODU,AL.T_ALTBIRIMADI,CASE K.T_CINSIYET
+         WHEN 'E' THEN
+          'Erkek'
+         WHEN 'K' THEN
+          'Kadın'
+       END AS CINSIYET,TRUNC(MONTHS_BETWEEN(b.t_basvurutarihi, K.T_DOGUMTARIHI) / 12) YAS
+ from hst_hastakarti k, hst_basvuru b,Hst_Altbirim AL,hst_tani t,hst_taniislem ti,hst_yatis y,hst_anabirim an
+where b.t_dosyano=k.t_dosyano 
+and t.t_taniid=ti.t_taniid
+and b.t_basvuruno=ti.t_basvuruno
+and b.t_basvuruno=y.t_basvuruno
+and t.t_detay_kodu='Q44.6'
+AND AL.T_ALTBIRIMKODU=y.t_bolumkodu
+and an.t_anabirimkodu=al.t_anabirimkodu
+and an.t_anabirimkodu='08'
+and y.t_harekettipi='2'
+and TO_DATE(b.t_basvurutarihi, 'dd.mm.yyyy') >=
+       TO_DATE('03.05.2018', 'dd.mm.yyyy')
+   and TO_DATE(b.t_basvurutarihi, 'dd.mm.yyyy') <=
+       TO_DATE('10.02.2020', 'dd.mm.yyyy')
+       group by k.t_tckimlikno,k.t_dosyano,k.t_adi,b.t_basvuruno,b.t_basvurutarihi,t.t_detay_kodu,t.t_detay_adi,AL.T_ALTBIRIMKODU,AL.T_ALTBIRIMADI, K.T_CINSIYET
+       ,TRUNC(MONTHS_BETWEEN(b.t_basvurutarihi, K.T_DOGUMTARIHI) / 12)

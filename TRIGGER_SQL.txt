@@ -1,0 +1,159 @@
+Declare
+
+  donemID       varchar2(20) := :1;
+  kisitMasterID varchar2(20) := :2;
+  perDisi       number(1);
+  sutKodu       varchar2(20);
+  kodTuru       number(1);
+  doktorKodu    varchar2(20) := :3;
+  kisitBastar   date := to_date(:4, 'dd.mm.yyyy');
+  kisitBittar   date := to_date(:5, 'dd.mm.yyyy');
+  donembastar   date;
+  donembittar   date;
+  silinecek_id  number;
+begin
+  begin
+    select nvl(k.t_perdisi, 0), k.t_islemkodu, k.t_kodtur
+      into perDisi, sutKodu, kodTuru
+      from kpy_kst_master k
+     where k.t_id = kisitMasterID;
+  exception
+    when no_data_found then
+      perDisi := 0;
+      sutKodu := '';
+      kodTuru := 0;
+  end;
+  if perDisi is null then
+    perDisi := 0;
+  end if;
+  if kodTuru is null then
+    kodTuru := 0;
+  end if;
+  begin
+    select trunc(l.t_bastar), trunc(l.t_bittar)
+      into donembastar, donembittar
+      from kpy_donem l
+     where l.t_id = donemID;
+  exception
+    when no_data_found then
+      donembastar := null;
+      donembittar := null;
+  end;
+  if donembastar is null or donembittar is null then
+    return;
+  end if;
+  for rec in (select *
+                from (select d.t_id as id_tera,
+                             d.t_basvuruno as basvuru_tera,
+                             t.t_resmikodu as resmikod_tera,
+                             d.t_performanstarih as performanstarih_tera,
+                             perf_puan_bul(d.t_performanstarih, d.t_detaykodu) as puan_tera
+                        from kpy_hesap_det d, hst_islem_detay t
+                       where d.t_donemid = donemID
+                         and d.t_per_sicilno = doktorKodu
+                         and d.t_detaykodu = t.t_detaykodu
+                         and t.t_resmikodu = '620160') tera,
+                     (select d.t_id as id_his, d.t_basvuruno as basvuruno_his,
+                             t.t_resmikodu as resmikod_his,
+                             d.t_performanstarih performanstarih_his,
+                             perf_puan_bul(d.t_performanstarih, d.t_detaykodu) as puan_his
+                        from kpy_hesap_det d, hst_islem_detay t
+                       where d.t_donemid = donemID
+                         and d.t_per_sicilno = doktorKodu
+                         and d.t_detaykodu = t.t_detaykodu
+                         and t.t_resmikodu = '620980') his
+               where tera.basvuru_tera = his.basvuruno_his
+                 and tera.performanstarih_tera = his.performanstarih_his) loop
+    silinecek_id := null;
+    if rec.puan_tera > rec.puan_his then
+      silinecek_id := rec.id_his;
+    else
+      silinecek_id := rec.id_tera;
+    end if;
+    insert into kpy_hesap_det_silinen
+      (t_id,
+       t_donemid,
+       t_per_sicilno,
+       t_basvuruno,
+       t_hastahizhareketid,
+       t_detaykodu,
+       t_performanstarih,
+       t_performanspuan,
+       t_miktar,
+       t_tutar,
+       t_userid,
+       t_islemtar,
+       t_createuser,
+       t_createisltar,
+       t_mesai,
+       t_bolum,
+       t_paketid,
+       t_istemid,
+       t_aciklama,
+       t_b2,
+       t_secim,
+       t_sag_sol,
+       t_euroscore,
+       t_kesi,
+       t_amlb2puanorani,
+       t_flag,
+       t_anestezib2orani,
+       t_islem_tarihi_time,
+       t_aml_bastar,
+       t_aml_bittar,
+       t_iptalnedeni,
+       t_ikincicerrah,
+       t_islemkvk,
+       t_perdisi,
+       t_kisitmasterid,
+       t_ozelislem,
+       t_ilavemakbuzid,
+       t_b3,
+       t_ozlhizkvk,
+       t_erc_saglik_turizmi)
+      select dd.t_id,
+             dd.t_donemid,
+             dd.t_per_sicilno,
+             dd.t_basvuruno,
+             dd.t_hastahizhareketid,
+             dd.t_detaykodu,
+             dd.t_performanstarih,
+             dd.t_performanspuan,
+             dd.t_miktar,
+             dd.t_tutar,
+             dd.t_userid,
+             dd.t_islemtar,
+             dd.t_createuser,
+             dd.t_createisltar,
+             dd.t_mesai,
+             dd.t_bolum,
+             dd.t_paketid,
+             dd.t_istemid,
+             dd.t_aciklama,
+             dd.t_b2,
+             dd.t_secim,
+             dd.t_sag_sol,
+             dd.t_euroscore,
+             dd.t_kesi,
+             dd.t_amlb2puanorani,
+             29,
+             dd.t_anestezib2orani,
+             dd.t_islem_tarihi_time,
+             dd.t_aml_bastar,
+             dd.t_aml_bittar,
+             dd.t_iptalnedeni,
+             dd.t_ikincicerrah,
+             1,
+             perDisi,
+             kisitMasterID,
+             dd.t_ozelislem,
+             dd.t_ilavemakbuzid,
+             dd.t_b3,
+             dd.t_ozlhizkvk,
+             dd.t_erc_saglik_turizmi
+        from kpy_hesap_det dd
+       where dd.t_id = silinecek_id;
+  
+    delete kpy_hesap_det kk where kk.t_id = silinecek_id;
+    end loop;
+  end;

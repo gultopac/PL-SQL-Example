@@ -1,0 +1,159 @@
+
+          SELECT  DISTINCT SQ1.T_ANABIRIMKODU,
+                SQ1.T_ANABIRIMADI,
+                SQ1.HASTA_8_1,
+                SQ1.HASTA_17_1,
+                SQ1.HASTA_24_1,
+                SQ2.T_ANABIRIMADI,
+                SQ2.T_ANABIRIMKODU,
+                SQ2.HASTA_8_2,
+                SQ2.HASTA_17_2,
+                SQ2.HASTA_24_2,
+                SQ3.T_ANABIRIMADI,
+                SQ3.T_ANABIRIMKODU,
+                SQ3.HASTA_8_3,
+                SQ3.HASTA_17_3,
+                SQ3.HASTA_24_3
+
+  FROM (Select AN.T_ANABIRIMADI,
+               AN.T_ANABIRIMKODU,
+               
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('08', '09', '10', '11', '12', '13', '14', '15') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_8_1,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('16', '17', '18', '19', '20', '21', '22', '23') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_17_1,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('24', '01', '02', '03', '04', '05', '06', '07') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_24_1
+        
+          From HST_BASVURU           B,
+               HST_HASTA_HIZ_HAREKET H,
+               HST_ALTBIRIM          A,
+               HST_ANABIRIM          AN,
+               HST_ISLEM_dETAY       D
+         Where B.T_BASVURUNO = H.T_BASVURUNO
+           AND H.T_TABLO_TUR = '4'
+           AND H.T_HIZMETKODU = D.T_DETAYKODU
+           AND B.T_BOLUMKODU = A.T_ALTBIRIMKODU
+           AND A.T_ANABIRIMKODU = AN.T_ANABIRIMKODU
+           AND D.T_GSSKODU = '5'
+           AND TO_DATE(B.T_BASVURUTARIHI, 'DD.MM.YYYY') >=
+               TO_DATE('20.01.2020', 'DD.MM.YYYY')
+           AND TO_DATE(B.T_BASVURUTARIHI, 'DD.MM.YYYY') <=
+               TO_DATE('24.01.2020', 'DD.MM.YYYY')
+        
+      GROUP BY AN.T_ANABIRIMKODU, AN.T_ANABIRIMADI   ) SQ1,
+       
+       (Select an.t_anabirimkodu,
+               an.t_anabirimadi,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('08', '09', '10', '11', '12', '13', '14', '15', '16') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_8_2,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('17', '18', '19', '20', '21', '22', '23') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_17_2,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('00', '01', '02', '03', '04', '05', '06', '07') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_24_2
+        
+          from hst_basvuru           b,
+               hst_altbirim          a,
+               hst_anabirim          an,
+               hst_hasta_hiz_hareket h,
+               erc_stk_kart e
+         where b.t_bolumkodu = a.t_altbirimkodu
+         and  e.t_stokkodu=h.t_hizmetkodu
+           and a.t_anabirimkodu = an.t_anabirimkodu
+           and h.t_tablo_tur = '1'
+           and b.t_basvuruno = h.t_basvuruno
+           and to_date(b.t_basvurutarihi, 'dd.mm.yyyy') >=
+               to_date('20.01.2020', 'dd.mm.yyyy')
+           and to_date(b.t_basvurutarihi, 'dd.mm.yyyy') <=
+               to_date('24.01.2020', 'dd.mm.yyyy')
+    GROUP BY an.T_ANABIRIMKODU, an.T_ANABIRIMADI  ) SQ2,
+      
+     (Select  an.t_anabirimkodu,
+               an.t_anabirimadi ,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('08', '09', '10', '11', '12', '13', '14', '15', '16') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_8_3,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('17', '18', '19', '20', '21', '22', '23') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_17_3,
+               SUM(case
+                     when to_char(b.t_basvurutarihi, 'hh24') in
+                          ('00', '01', '02', '03', '04', '05', '06', '07') then
+                      1
+                     else
+                      0
+                   end) AS HASTA_24_3
+        
+          from hst_basvuru           b,
+               hst_altbirim          a,
+               hst_anabirim          an,
+               hst_hasta_hiz_hareket h,
+               stk_malzeme m
+         where b.t_bolumkodu = a.t_altbirimkodu
+         and m.t_barkod=h.t_barkod
+           and a.t_anabirimkodu = an.t_anabirimkodu
+           and h.t_tablo_tur = '3'
+           and b.t_basvuruno = h.t_basvuruno
+           and to_date(b.t_basvurutarihi, 'dd.mm.yyyy') >=
+               to_date('20.01.2020', 'dd.mm.yyyy')
+           and to_date(b.t_basvurutarihi, 'dd.mm.yyyy') <=
+               to_date('24.01.2020', 'dd.mm.yyyy')
+    GROUP BY an.T_ANABIRIMKODU, an.T_ANABIRIMADI  )SQ3
+
+
+ GROUP BY SQ1.T_ANABIRIMKODU,
+          SQ1.T_ANABIRIMADI,
+          SQ1.HASTA_8_1,
+          SQ1.HASTA_17_1,
+          SQ1.HASTA_24_1, 
+          
+          SQ2.T_ANABIRIMADI,
+          SQ2.T_ANABIRIMKODU,
+          SQ2.HASTA_8_2,
+          SQ2.HASTA_17_2,
+          SQ2.HASTA_24_2,
+          
+          SQ3.T_ANABIRIMADI,
+          SQ3.T_ANABIRIMKODU,
+          SQ3.HASTA_8_3,
+          SQ3.HASTA_17_3,
+          SQ3.HASTA_24_3
+          

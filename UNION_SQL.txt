@@ -1,0 +1,29 @@
+select k.t_adi,k.t_tckimlikno,b.t_basvuruno,b.t_dosyano,i.t_ameliyattarihi,ıd.t_raportext
+from hst_hastakarti k,hst_basvuru b,hst_hasta_hiz_hareket h,hst_altbirim al,hst_anabirim an,hst_islem_detay d,hst_aml_istem i,hst_aml_istemdetay ıd
+where b.t_basvuruno=h.t_basvuruno
+and d.t_detaykodu=h.t_hizmetkodu
+and b.t_bolumkodu=al.t_altbirimkodu
+and k.t_dosyano=b.t_dosyano
+and al.t_anabirimkodu=an.t_anabirimkodu
+and i.t_aml_istemno=ıd.t_aml_istemno
+and b.t_basvuruno=i.t_basvuruno
+and d.t_resmikodu IN('611000')
+and an.t_anabirimkodu='19'
+and to_date(h.t_islem_tarihi_date,'dd.mm.yyyy')>=to_date('01.01.2011','dd.mm.yyyy')
+and to_date(h.t_islem_tarihi_date,'dd.mm.yyyy')<=to_date('31.12.2019','dd.mm.yyyy') 
+and ıd.t_raportext like '%PFN%'
+UNION
+select k.t_adi,k.t_tckimlikno,b.t_basvuruno,b.t_dosyano,i.t_ameliyattarihi,ıd.t_raportext
+from hst_hastakarti k,hst_basvuru b,hst_hasta_hiz_hareket h,hst_altbirim al,hst_anabirim an,hst_islem_detay d,hst_aml_istem i,hst_aml_istemdetay ıd
+where b.t_basvuruno=h.t_basvuruno
+and d.t_detaykodu=h.t_hizmetkodu
+and b.t_bolumkodu=al.t_altbirimkodu
+and k.t_dosyano=b.t_dosyano
+and al.t_anabirimkodu=an.t_anabirimkodu
+and i.t_aml_istemno=ıd.t_aml_istemno
+and b.t_basvuruno=i.t_basvuruno
+and d.t_resmikodu IN('612320')
+and an.t_anabirimkodu='19'
+and to_date(h.t_islem_tarihi_date,'dd.mm.yyyy')>=to_date('01.01.2011','dd.mm.yyyy')
+and to_date(h.t_islem_tarihi_date,'dd.mm.yyyy')<=to_date('31.12.2019','dd.mm.yyyy') 
+and ıd.t_raportext like '%PARSİYEL KALÇA ARTROPLASTİSİ%'

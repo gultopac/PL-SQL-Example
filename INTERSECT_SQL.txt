@@ -1,0 +1,21 @@
+select b.t_dosyano,b.t_basvuruno,k.t_tckimlikno,k.t_adi
+ from hst_islem_detay d,hst_hasta_hiz_hareket h,hst_basvuru b,hst_hastakarti k
+where h.t_hizmetkodu=d.t_detaykodu
+and b.t_basvuruno=h.t_basvuruno
+and k.t_dosyano=b.t_dosyano
+and d.t_resmikodu='910990' 
+and TO_DATE(h.t_islem_tarihi_date, 'dd.mm.yyyy') >=
+       TO_DATE('03.05.2018', 'dd.mm.yyyy')
+and TO_DATE(h.t_islem_tarihi_date, 'dd.mm.yyyy') <=
+       TO_DATE('31.12.2019', 'dd.mm.yyyy')
+INTERSECT 
+select b.t_dosyano,b.t_basvuruno,k.t_tckimlikno,k.t_adi
+from hst_islem_detay d,hst_hasta_hiz_hareket h,hst_basvuru b,hst_hastakarti k
+where h.t_hizmetkodu=d.t_detaykodu
+and k.t_dosyano=b.t_dosyano
+and b.t_basvuruno=h.t_basvuruno
+and d.t_resmikodu='910910'
+and TO_DATE(h.t_islem_tarihi_date, 'dd.mm.yyyy') >=
+       TO_DATE('03.05.2018', 'dd.mm.yyyy')
+and TO_DATE(h.t_islem_tarihi_date, 'dd.mm.yyyy') <=
+       TO_DATE('31.12.2019', 'dd.mm.yyyy')
